@@ -30,8 +30,3 @@ class SubjectForm(forms.ModelForm):
     class Meta:
         model = Subject
         fields = ['subjectCode', 'subjectName', 'D_Code']
-
-    def __init__(self, *args, **kwargs):
-        super(SubjectForm, self).__init__(*args, **kwargs)
-        if self.instance and self.instance.pk:
-            self.fields['subjectCode'].widget.attrs['readonly'] = True
