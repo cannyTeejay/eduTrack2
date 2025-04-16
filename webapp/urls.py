@@ -32,5 +32,9 @@ urlpatterns = [
     path('attendance/add/', views.attendance_create, name='attendance_create'),
     path('attendance/update/<int:pk>/', views.attendance_update, name='attendance_update'),
     path('attendance/delete/<int:pk>/', views.attendance_delete, name='attendance_delete'),
-    
+    #Subjectv urls
+    path('subjects/', views.subject_list, name='subject_list'),
+    path('subjects/add/', views.subject_create, name='subject_create'),
+    path('subjects/update/<str:pk>/', views.subject_update, name='subject_update'),
+    path('subjects/delete/<str:pk>/', views.subject_delete, name='subject_delete'),
 ]

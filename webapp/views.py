@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Student,Lecturer,Admin,Department,Attendance
-from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm
+from .models import Student,Lecturer,Admin,Department,Attendance,Subject
+from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm,SubjectForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -207,3 +207,34 @@ def attendance_delete(request, pk):
         record.delete()
         return redirect('attendance_list')
     return render(request, 'attendance/attendance_confirm_delete.html', {'record': record})
+
+#Subject VIEWS
+
+def subject_list(request):
+    subjects = Subject.objects.select_related('D_Code').all()
+    return render(request, 'subject/subject_list.html', {'subjects': subjects})
+
+def subject_create(request):
+    if request.method == 'POST':
+        form = SubjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('subject_list')
+    else:
+        form = SubjectForm()
+    return render(request, 'subject/subject_form.html', {'form': form})
+
+def subject_update(request, pk):
+    subject = get_object_or_404(Subject, pk=pk)
+    form = SubjectForm(request.POST or None, instance=subject)
+    if form.is_valid():
+        form.save()
+        return redirect('subject_list')
+    return render(request, 'subject/subject_form.html', {'form': form})
+
+def subject_delete(request, pk):
+    subject = get_object_or_404(Subject, pk=pk)
+    if request.method == 'POST':
+        subject.delete()
+        return redirect('subject_list')
+    return render(request, 'subject/confirm_delete.html', {'subject': subject})

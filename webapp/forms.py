@@ -1,5 +1,5 @@
 from django import forms
-from .models import Student,Lecturer,Admin,Department,Attendance
+from .models import Student,Lecturer,Admin,Department,Attendance,Subject
 
 class StudentForm(forms.ModelForm):
     class Meta:
@@ -25,3 +25,13 @@ class AttendanceForm(forms.ModelForm):
     class Meta:
         model = Attendance
         fields = ['studentNumber', 'subjectCode', 'status']
+
+class SubjectForm(forms.ModelForm):
+    class Meta:
+        model = Subject
+        fields = ['subjectCode', 'subjectName', 'D_Code']
+
+    def __init__(self, *args, **kwargs):
+        super(SubjectForm, self).__init__(*args, **kwargs)
+        if self.instance and self.instance.pk:
+            self.fields['subjectCode'].widget.attrs['readonly'] = True

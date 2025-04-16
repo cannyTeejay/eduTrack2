@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-_q#ksad%w5%xzg*pp8tz!vy3z-l9k^(1#8&1%hi=_g035e31f^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['edutrack2.onrender.com']
+ALLOWED_HOSTS = ['edutrack2.onrender.com','127.0.0.1']
 
 
 # Application definition
@@ -86,6 +86,17 @@ DATABASES = {
         'PORT': '5432',
     }
 }
+'''
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'EduTrackDB',      # Database name
+        'USER': 'postgres',      # Database user
+        'PASSWORD': 'Canny',       # User's password
+        'HOST': 'localhost',               # Database host
+        'PORT': '5432',
+    }
+}'''
 
 
 # Password validation
