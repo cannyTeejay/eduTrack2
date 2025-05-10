@@ -37,4 +37,7 @@ urlpatterns = [
     path('subjects/add/', views.subject_create, name='subject_create'),
     path('subjects/update/<str:pk>/', views.subject_update, name='subject_update'),
     path('subjects/delete/<str:pk>/', views.subject_delete, name='subject_delete'),
+
+    #Update Marks urls
+    path('update_marks/', views.update_marks, name='update_marks'),
 ]

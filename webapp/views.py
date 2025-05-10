@@ -1,9 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Student,Lecturer,Admin,Department,Attendance,Subject
-from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm,SubjectForm
+from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm,SubjectForm,UpdateMarksForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.http import JsonResponse
+from django.db import connection
+from .utils import update_marks
+
 
 #Home VIEW
 def home(request):
@@ -238,3 +242,67 @@ def subject_delete(request, pk):
         subject.delete()
         return redirect('subject_list')
     return render(request, 'subject/confirm_delete.html', {'subject': subject})
+
+#Update Marks VIEWS
+def update_student_marks_view(request):
+    if request.method == 'POST':
+        form = UpdateMarksForm(request.POST)
+        if form.is_valid():
+            student_id = form.cleaned_data['student_id']
+            assessment_code = form.cleaned_data['assessment_code']
+            new_marks = form.cleaned_data['new_marks']
+
+            # Calling the procedure to update marks in the database...
+            try:
+                update_marks(student_id, assessment_code, new_marks)
+                return JsonResponse({'status': 'success', 'message': 'Marks updated successfully.'})
+            except Exception as e:
+                return JsonResponse({'status': 'error', 'message': f'Error updating marks: {e}'})
+        else:
+            return JsonResponse({'status': 'error', 'message': 'Invalid form data.'})
+
+    else:
+        form = UpdateMarksForm()
+        return render(request, 'update_marks_form.html', {'form': form})
+    
+#Student Attendance VIEWS
+def get_student_attendance(request):
+    if request.method == 'POST':
+        student_id = request.POST.get('student_id')
+        subject_code = request.POST.get('subject_code')
+
+        # Call the stored procedure to fetch the attendance
+        with connection.cursor() as cursor:
+            cursor.callproc('get_student_attendance', [student_id, subject_code])
+            rows = cursor.fetchall()
+
+        if rows:
+            attendance_status = rows[0][0]
+            context = {'attendance_status': attendance_status}
+        else:
+            context = {'error': 'No attendance records found for the given student and subject.'}
+
+        return render(request, 'attendance/student_attendance.html', context)
+
+    return render(request, 'attendance/student_attendance_form.html')
+
+#Lecturer Subjects VIEWS
+def get_lecturer_subjects(request):
+    if request.method == 'POST':
+        lecturer_id = request.POST.get('lecturer_id')
+
+        # Call the stored procedure to fetch the subjects
+        with connection.cursor() as cursor:
+            cursor.callproc('get_lecturer_subjects', [lecturer_id])
+            rows = cursor.fetchall()
+
+        # Process results
+        if rows:
+            subjects = [{'subject_code': row[0], 'subject_name': row[1]} for row in rows]
+            context = {'subjects': subjects}
+        else:
+            context = {'error': 'No subjects found for the given lecturer.'}
+
+        return render(request, 'lecturer/lecturer_subjects.html', context)
+
+    return render(request, 'lecturer/lecturer_subjects_form.html')
