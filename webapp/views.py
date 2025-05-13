@@ -263,7 +263,7 @@ def update_student_marks_view(request):
 
     else:
         form = UpdateMarksForm()
-        return render(request, 'update_marks_form.html', {'form': form})
+        return render(request, 'lecturers/update_marks_form.html', {'form': form})
     
 #Student Attendance VIEWS
 def get_student_attendance(request):
@@ -303,6 +303,6 @@ def get_lecturer_subjects(request):
         else:
             context = {'error': 'No subjects found for the given lecturer.'}
 
-        return render(request, 'lecturer/lecturer_subjects.html', context)
+        return render(request, 'lecturers/lecturer_subjects.html', context)
 
-    return render(request, 'lecturer/lecturer_subjects_form.html')
+    return render(request, 'lecturers/lecturer_subjects_form.html')

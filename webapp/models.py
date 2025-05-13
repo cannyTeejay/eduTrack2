@@ -60,8 +60,8 @@ class Subject(models.Model):
     
 class Attendance(models.Model):
     attendID = models.AutoField(primary_key=True)
-    studentNumber = models.ForeignKey(Student,on_delete=models.CASCADE)
-    subjectCode = models.ForeignKey(Subject,on_delete=models.CASCADE)
+    studentNumber = models.ForeignKey(Student,on_delete=models.CASCADE,null=True)    
+    subjectCode = models.ForeignKey(Subject,on_delete=models.CASCADE, null=True)
     dateAndTime = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20)
 

@@ -79,10 +79,10 @@ WSGI_APPLICATION = 'myserver.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'edutrack_db',      # Database name
+        'NAME': 'EduTrackDB',      # Database name
         'USER': 'postgres',      # Database user
-        'PASSWORD': 'Edutrack!',       # User's password
-        'HOST': 'mydb-instance.cteq8e6iw1r6.eu-north-1.rds.amazonaws.com',               # Database host
+        'PASSWORD': 'Canny',       # User's password
+        'HOST': 'localhost',               # Database host
         'PORT': '5432',
     }
 }

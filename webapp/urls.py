@@ -39,5 +39,12 @@ urlpatterns = [
     path('subjects/delete/<str:pk>/', views.subject_delete, name='subject_delete'),
 
     #Update Marks urls
-    path('update_marks/', views.update_marks, name='update_marks'),
+    path('update_marks/', views.update_student_marks_view, name='update_marks'),
+
+    # Student attendance view
+    path('student_attendance/', views.get_student_attendance, name='student_attendance'),
+
+    # Lecturer subjects view
+    path('lecturer_subjects/', views.get_lecturer_subjects, name='lecturer_subjects'),
+    
 ]

@@ -35,3 +35,10 @@ class UpdateMarksForm(forms.Form):
     student_id = forms.CharField(max_length=9, label='Student Number')  # Ensure this matches your DB length
     assessment_code = forms.CharField(max_length=225, label='Assessment Code')
     new_marks = forms.IntegerField(label='New Marks')
+
+class StudentAttendanceForm(forms.Form):
+    student_id = forms.CharField(max_length=9, label='Student Number')
+    subject_code = forms.CharField(max_length=20, label='Subject Code')
+
+class LecturerSubjectsForm(forms.Form):
+    lecturer_id = forms.CharField(max_length=9, label='Lecturer Staff Number')
