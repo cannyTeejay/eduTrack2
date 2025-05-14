@@ -286,6 +286,7 @@ def get_student_attendance(request):
 
     return render(request, 'attendance/student_attendance_form.html')
 
+@login_required
 #Lecturer Subjects VIEWS
 def get_lecturer_subjects(request):
     if request.method == 'POST':
