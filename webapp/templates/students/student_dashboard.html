@@ -7,6 +7,13 @@
 <body class="bg-light">
 
 <div class="container mt-5">
+    <div class="d-flex justify-content-end mb-3">
+        <form action="{% url 'logout' %}" method="post" style="display:inline;">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
+        </form>
+    </div>
+
     <h2>Welcome, {{ student.firstName }} {{ student.lastName }}</h2>
 
     <h4 class="mt-4">Your Registered Modules</h4>

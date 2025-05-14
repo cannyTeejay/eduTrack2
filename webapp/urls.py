@@ -3,8 +3,10 @@ from . import views
 
 urlpatterns = [
     #Home url
-    path('', views.role_login, name='login'),  # Home page is now the login page
-    path('login/', views.role_login, name='login'),  # Optional: keep this for /login/ as well
+    path('', views.role_login, name='login'),
+    path('login/', views.role_login, name='login'),
+    #Logout url
+    path('logout/', views.logout_view, name='logout'),
     #Student urls
     path('students/', views.student_list, name='student_list'),
     path('students/add/', views.student_create, name='student_create'),

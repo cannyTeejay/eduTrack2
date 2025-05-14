@@ -314,18 +314,12 @@ def student_dashboard(request):
     try:
         student = Student.objects.get(user=request.user)
 
-        # Subjects where the student has attendance
         attendance_subjects = Subject.objects.filter(attendance__studentNumber=student)
-
-        # Subjects where the student has progress
         progress_subjects = Subject.objects.filter(studentprogress__studentNumber=student)
-
-        # Subjects where the student has marks (via Assessment and StudentMarks)
         marks_subjects = Subject.objects.filter(
-            assessment__studentmarks_set__studentNumber=student
+            assessment__studentmarks__studentNumber=student
         )
 
-        # Combine all subjects and remove duplicates
         all_subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
 
         return render(request, 'students/student_dashboard.html', {
@@ -335,7 +329,6 @@ def student_dashboard(request):
 
     except Student.DoesNotExist:
         return redirect('login')
-    
 
 
 def role_login(request):
@@ -380,3 +373,8 @@ def role_login(request):
     else:
         form = RoleLoginForm()
     return render(request, 'login.html', {'form': form})
+
+
+def logout_view(request):
+    logout(request)
+    return redirect('login')

@@ -45,10 +45,23 @@ class LecturerSubjectsForm(forms.Form):
 
 
 class RoleLoginForm(forms.Form):
-    user_number = forms.CharField(label='User Number', max_length=255)
+    user_number = forms.CharField(
+        label='User Number',
+        max_length=255,
+        required=True,
+        widget=forms.TextInput(attrs={'class': 'form-control'})
+    )
     password = forms.CharField(widget=forms.PasswordInput)
     role = forms.ChoiceField(choices=[
         ('student', 'Student'),
         ('lecturer', 'Lecturer'),
         ('admin', 'Admin'),
     ])
+
+    def clean_user_number(self):
+        user_number = self.cleaned_data.get('user_number')
+        if not user_number:
+            raise forms.ValidationError("User number is required.")
+        if not user_number.isdigit():
+            raise forms.ValidationError("User number must be numeric.")
+        return user_number
