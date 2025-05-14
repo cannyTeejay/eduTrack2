@@ -4,20 +4,22 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 class Student(models.Model):
-    studentNumber = models.CharField(max_length=9,primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    studentNumber = models.CharField(max_length=9, primary_key=True)
     firstName = models.CharField(max_length=255)
     lastName = models.CharField(max_length=255)
-    email = models.EmailField(max_length=50,unique=True)
+    email = models.EmailField(max_length=50, unique=True)
 
     def __str__(self):
         return f"{self.firstName} {self.lastName} - {self.studentNumber}"
 
 
 class Lecturer(models.Model):
-    staffNumber = models.CharField(max_length=9,primary_key=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True)
+    staffNumber = models.CharField(max_length=9, primary_key=True)
     firstName = models.CharField(max_length=255)
     lastName = models.CharField(max_length=255)
-    email = models.EmailField(max_length=50,unique=True, null=True, blank=True)
+    email = models.EmailField(max_length=50, unique=True, null=True, blank=True)
 
     def __str__(self):
         return f"Lecturer: {self.firstName} {self.lastName}"

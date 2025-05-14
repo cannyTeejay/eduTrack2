@@ -1,6 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Student,Lecturer,Admin,Department,Attendance,Subject
-from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm,SubjectForm,UpdateMarksForm
+from .forms import StudentForm,LecturerForm,AdminForm,DepartmentForm,AttendanceForm,SubjectForm,UpdateMarksForm,RoleLoginForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -307,3 +307,76 @@ def get_lecturer_subjects(request):
         return render(request, 'lecturers/lecturer_subjects.html', context)
 
     return render(request, 'lecturers/lecturer_subjects_form.html')
+
+
+@login_required
+def student_dashboard(request):
+    try:
+        student = Student.objects.get(user=request.user)
+
+        # Subjects where the student has attendance
+        attendance_subjects = Subject.objects.filter(attendance__studentNumber=student)
+
+        # Subjects where the student has progress
+        progress_subjects = Subject.objects.filter(studentprogress__studentNumber=student)
+
+        # Subjects where the student has marks (via Assessment and StudentMarks)
+        marks_subjects = Subject.objects.filter(
+            assessment__studentmarks_set__studentNumber=student
+        )
+
+        # Combine all subjects and remove duplicates
+        all_subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
+
+        return render(request, 'students/student_dashboard.html', {
+            'student': student,
+            'subjects': all_subjects,
+        })
+
+    except Student.DoesNotExist:
+        return redirect('login')
+    
+
+
+def role_login(request):
+    if request.method == 'POST':
+        form = RoleLoginForm(request.POST)
+        if form.is_valid():
+            user_number = form.cleaned_data['user_number']
+            password = form.cleaned_data['password']
+            role = form.cleaned_data['role']
+
+            user = None
+            if role == 'student':
+                try:
+                    student = Student.objects.get(studentNumber=user_number)
+                    user = authenticate(request, username=student.user.username, password=password)
+                except Student.DoesNotExist:
+                    user = None
+            elif role == 'lecturer':
+                try:
+                    lecturer = Lecturer.objects.get(staffNumber=user_number)
+                    user = authenticate(request, username=lecturer.user.username, password=password)
+                except Lecturer.DoesNotExist:
+                    user = None
+            elif role == 'admin':
+                try:
+                    admin = Admin.objects.get(email=user_number)
+                    user = authenticate(request, username=admin.user.username, password=password)
+                except Admin.DoesNotExist:
+                    user = None
+
+            if user is not None:
+                login(request, user)
+                # Redirect based on role
+                if role == 'student':
+                    return redirect('student_dashboard')
+                elif role == 'lecturer':
+                    return redirect('lecturer_list')
+                elif role == 'admin':
+                    return redirect('admin_list')
+            else:
+                messages.error(request, 'Invalid credentials or user not found.')
+    else:
+        form = RoleLoginForm()
+    return render(request, 'login.html', {'form': form})

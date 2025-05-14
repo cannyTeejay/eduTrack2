@@ -3,7 +3,8 @@ from . import views
 
 urlpatterns = [
     #Home url
-    path('', views.home, name='home'),
+    path('', views.role_login, name='login'),  # Home page is now the login page
+    path('login/', views.role_login, name='login'),  # Optional: keep this for /login/ as well
     #Student urls
     path('students/', views.student_list, name='student_list'),
     path('students/add/', views.student_create, name='student_create'),
@@ -47,4 +48,6 @@ urlpatterns = [
     # Lecturer subjects view
     path('lecturer_subjects/', views.get_lecturer_subjects, name='lecturer_subjects'),
     
+    #Student Dashboard
+    path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
 ]

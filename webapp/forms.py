@@ -32,7 +32,7 @@ class SubjectForm(forms.ModelForm):
         fields = ['subjectCode', 'subjectName', 'D_Code']
 
 class UpdateMarksForm(forms.Form):
-    student_id = forms.CharField(max_length=9, label='Student Number')  # Ensure this matches your DB length
+    student_id = forms.CharField(max_length=9, label='Student Number')
     assessment_code = forms.CharField(max_length=225, label='Assessment Code')
     new_marks = forms.IntegerField(label='New Marks')
 
@@ -42,3 +42,13 @@ class StudentAttendanceForm(forms.Form):
 
 class LecturerSubjectsForm(forms.Form):
     lecturer_id = forms.CharField(max_length=9, label='Lecturer Staff Number')
+
+
+class RoleLoginForm(forms.Form):
+    user_number = forms.CharField(label='User Number', max_length=255)
+    password = forms.CharField(widget=forms.PasswordInput)
+    role = forms.ChoiceField(choices=[
+        ('student', 'Student'),
+        ('lecturer', 'Lecturer'),
+        ('admin', 'Admin'),
+    ])

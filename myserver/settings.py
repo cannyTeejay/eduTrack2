@@ -79,7 +79,7 @@ WSGI_APPLICATION = 'myserver.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'EduTrackDB',      # Database name
+        'NAME': 'edutrack_db',      # Database name
         'USER': 'postgres',      # Database user
         'PASSWORD': 'Canny',       # User's password
         'HOST': 'localhost',               # Database host
