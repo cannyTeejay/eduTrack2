@@ -53,6 +53,10 @@ urlpatterns = [
     #Student Dashboard
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
 
+    #Student Dashboard
+    path('lecturer_dashboad/', views.lecturer_dashboard, name='lecturer_dashboad'),
+    
+
     #Download Student-Subject CSV
     path('download_subjects/', views.download_subjects_csv, name='download_subjects_csv'),
 

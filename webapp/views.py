@@ -13,7 +13,9 @@ from django.contrib.auth.decorators import login_required
 from .models import Subject, Student
 from .models import StudentProgress, StudentMarks, Assessment, Subject
 from django.utils import timezone
-
+from django.shortcuts import render
+from .models import Lecturer, LecturerCourses, Assessment, Student, StudentProgress, Attendance, Subject  # Import your models
+from django.utils import timezone
 
 #Home VIEW
 def home(request):
@@ -404,7 +406,7 @@ def role_login(request):
                 if role == 'student':
                     return redirect('student_dashboard')
                 elif role == 'lecturer':
-                    return redirect('lecturer_list')
+                    return redirect('lecturer_dashboad')
                 elif role == 'admin':
                     return redirect('admin_list')
             else:
@@ -534,3 +536,31 @@ def download_attendance_csv(request):
         ])
 
     return response
+
+
+
+
+
+def lecturer_dashboard(request):
+    lecturer = Lecturer.objects.get(user=request.user)  # Assuming you have user authentication
+    courses = LecturerCourses.objects.filter(staffNumber=lecturer)
+    assessments = Assessment.objects.filter(staffNumber=lecturer)
+    upcoming_assessments = assessments.filter(due_date__gte=timezone.now().date()).order_by('due_date')
+
+    # Example of fetching students (adjust based on your actual relationships)
+    enrolled_students = set()
+    lecturer_subjects = [lc.subjectCode for lc in courses]
+    for subject in lecturer_subjects:
+        student_progress = StudentProgress.objects.filter(subjectCode=subject).select_related('studentNumber')
+        for sp in student_progress:
+            sp.studentNumber.enrolled_courses = StudentProgress.objects.filter(studentNumber=sp.studentNumber).select_related('subjectCode__subjectName', 'subjectCode__subjectCode')
+            enrolled_students.add(sp.studentNumber)
+
+    context = {
+        'lecturer': lecturer,
+        'courses': courses,
+        'assessments': assessments,
+        'upcoming_assessments': upcoming_assessments,
+        'enrolled_students': list(enrolled_students),
+    }
+    return render(request, 'lecturers/lecture_dashboad.html', context)
