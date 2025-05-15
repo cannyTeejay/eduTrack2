@@ -52,4 +52,12 @@ urlpatterns = [
     
     #Student Dashboard
     path('student_dashboard/', views.student_dashboard, name='student_dashboard'),
+
+    #Download Student-Subject CSV
+    path('download_subjects/', views.download_subjects_csv, name='download_subjects_csv'),
+
+    path('student_attendance/', views.student_attendance, name='student_attendance'),
+
+    # Take attendance
+    path('take_attendance/', views.take_attendance, name='take_attendance'),
 ]

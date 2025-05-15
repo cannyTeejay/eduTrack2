@@ -96,11 +96,12 @@ class LecturerCourses(models.Model):
         return f"{self.staffNumber} ({self.subjectCode})"
 
 class Assessment(models.Model):
-    assessmentCode = models.CharField(max_length=225,primary_key=True)
+    assessmentCode = models.CharField(max_length=225, primary_key=True)
     assessmentName = models.CharField(max_length=225)
     totalMark = models.IntegerField()
-    subjectCode = models.ForeignKey(Subject,on_delete=models.CASCADE)
-    staffNumber = models.ForeignKey(Lecturer,on_delete=models.CASCADE)
+    subjectCode = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    staffNumber = models.ForeignKey(Lecturer, on_delete=models.CASCADE)
+    due_date = models.DateField(null=True, blank=True)  # <-- Add this line
 
     def __str__(self):
         return f"{self.assessmentCode} ({self.assessmentName}) - {self.totalMark}"

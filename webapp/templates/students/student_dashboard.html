@@ -1,41 +1,269 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
     <title>Student Dashboard</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .sidebar {
+            width: 220px;
+            min-height: 100vh;
+            background-color: #2c3e50;
+            color: white;
+            position: fixed;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        .user-info {
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid #3d5166;
+            margin-bottom: 20px;
+        }
+        .user-id {
+            font-size: 14px;
+            color: #95a5a6;
+        }
+        .user-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin: 5px 0;
+        }
+        .nav-menu {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .nav-item {
+            margin-bottom: 5px;
+        }
+        .nav-link {
+            display: block;
+            padding: 12px 15px;
+            color: #ecf0f1;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        .nav-link:hover, .nav-link.active {
+            background-color: #3498db;
+            color: white;
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+        .header {
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        .dashboard-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        .card:hover {
+            transform: translateY(-5px);
+        }
+        .card-header {
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #3498db;
+        }
+        .card-content {
+            color: #7f8c8d;
+        }
+        .subjects-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        .subject-card {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid #3498db;
+        }
+        .subject-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .subject-name {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+        .subject-meta {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+    </style>
 </head>
 <body class="bg-light">
 
-<div class="container mt-5">
-    <div class="d-flex justify-content-end mb-3">
-        <form action="{% url 'logout' %}" method="post" style="display:inline;">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger btn-sm">Logout</button>
-        </form>
+
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-id">{{ student.studentNumber }}</div>
+        <div class="user-name">{{ student.firstName }} {{ student.lastName }}</div>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item"><a href="#" class="nav-link active" data-section="dashboard">Dashboard</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="courses">My Courses</a></li>
+        <li class="nav-item"><a href="#" class="nav-link" data-section="attendance">Attendance</a></li>
+    </ul>
+    <form action="{% url 'logout' %}" method="post" style="margin-top: 30px;">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger w-100">Logout</button>
+    </form>
+</div>
+
+<div class="main-content" id="dashboard-content">
+    <div class="header">Dashboard</div>
+
+    <!-- Personal Information Card (moved to top) -->
+    <div class="card mb-4" style="max-width: 400px;">
+        <div class="card-header">Personal Information</div>
+        <div class="card-content">
+            <strong>Name:</strong> {{ student.firstName }} {{ student.lastName }}<br>
+            <strong>Student Number:</strong> {{ student.studentNumber }}<br>
+            <strong>Email:</strong> {{ student.email }}
+        </div>
     </div>
 
-    <h2>Welcome, {{ student.firstName }} {{ student.lastName }}</h2>
+    <div class="dashboard-cards">
+        <div class="card">
+            <div class="card-header">Current Courses</div>
+            <div class="card-content">
+                <ul>
+                    {% for subject in subjects %}
+                    <li>{{ subject.subjectName }} ({{ subject.subjectCode }})</li>
+                    {% empty %}
+                    <li>No courses found.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Subject Grades</div>
+            <div class="card-content">
+                <ul>
+                    {% for p in progress %}
+                        <li>{{ p.subjectCode.subjectName }}: {{ p.grade }}</li>
+                    {% empty %}
+                        <li>No grades available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Assessment Marks</div>
+            <div class="card-content">
+                <ul>
+                    {% for mark in marks %}
+                        <li>
+                            {{ mark.assessmentCode.assessmentName }} ({{ mark.assessmentCode.subjectCode.subjectName }}):
+                            {{ mark.marksObtained }}/{{ mark.assessmentCode.totalMark }}
+                        </li>
+                    {% empty %}
+                        <li>No marks available.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Upcoming Assessments</div>
+            <div class="card-content">
+                <ul>
+                    {% for a in upcoming_assessments %}
+                        <li>
+                            {{ a.assessmentName }} ({{ a.subjectCode.subjectName }}) - Due: {{ a.due_date }}
+                        </li>
+                    {% empty %}
+                        <li>No upcoming assessments.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <h4 class="mt-4">Your Registered Modules</h4>
-    <table class="table table-bordered mt-3">
+<div class="main-content subjects-container" id="subjects-content">
+    <div class="header d-flex justify-content-between align-items-center">
+        <span>My Subjects</span>
+        <a href="{% url 'download_subjects_csv' %}" class="btn btn-outline-primary btn-sm">
+            Download CSV
+        </a>
+    </div>
+    
+</div>
+
+<div class="main-content attendance-container" id="attendance-content" style="display:none;">
+    <div class="header">Attendance Records</div>
+    <table class="table">
         <thead>
             <tr>
-                <th>Module Code</th>
-                <th>Module Name</th>
+                <th>Subject</th>
+                <th>Date</th>
+                <th>Status</th>
             </tr>
         </thead>
         <tbody>
-            {% for subject in subjects %}
+            {% for record in attendance_records %}
             <tr>
-                <td>{{ subject.subjectCode }}</td>
-                <td>{{ subject.subjectName }}</td>
+                <td>{{ record.subjectCode.subjectName }}</td>
+                <td>{{ record.dateAndTime|date:"Y-m-d" }}</td>
+                <td>{{ record.status }}</td>
             </tr>
             {% empty %}
-            <tr><td colspan="2">No modules found.</td></tr>
+            <tr>
+                <td colspan="3">No attendance records found.</td>
+            </tr>
             {% endfor %}
         </tbody>
     </table>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const dashboardContent = document.getElementById('dashboard-content');
+    const attendanceContent = document.getElementById('attendance-content');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    navLinks.forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            navLinks.forEach(l => l.classList.remove('active'));
+            this.classList.add('active');
+            const section = this.getAttribute('data-section');
+            if (section === 'dashboard') {
+                dashboardContent.style.display = 'block';
+                attendanceContent.style.display = 'none';
+            } else if (section === 'attendance') {
+                dashboardContent.style.display = 'none';
+                attendanceContent.style.display = 'block';
+            }
+        });
+    });
+});
+</script>
 
 </body>
 </html>

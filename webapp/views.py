@@ -7,6 +7,12 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db import connection
 from .utils import update_marks
+import csv
+from django.http import HttpResponse
+from django.contrib.auth.decorators import login_required
+from .models import Subject, Student
+from .models import StudentProgress, StudentMarks, Assessment, Subject
+from django.utils import timezone
 
 
 #Home VIEW
@@ -313,20 +319,35 @@ def get_lecturer_subjects(request):
 def student_dashboard(request):
     try:
         student = Student.objects.get(user=request.user)
-
         attendance_subjects = Subject.objects.filter(attendance__studentNumber=student)
         progress_subjects = Subject.objects.filter(studentprogress__studentNumber=student)
         marks_subjects = Subject.objects.filter(
             assessment__studentmarks__studentNumber=student
         )
+        subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
 
-        all_subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
+        # 3. Progress/Grades
+        progress = StudentProgress.objects.filter(studentNumber=student).select_related('subjectCode')
+
+        # 4. Marks/Assessments
+        marks = StudentMarks.objects.filter(studentNumber=student).select_related('assessmentCode', 'assessmentCode__subjectCode')
+
+        # 8. Upcoming Assessments (assuming you have a date field, e.g., due_date)
+        upcoming_assessments = Assessment.objects.filter(
+            subjectCode__in=subjects,
+            due_date__gte=timezone.now().date()  # Only future or today
+        ).order_by('due_date')[:5]  # Adjust ordering if you add a date field
+
+        attendance_records = Attendance.objects.filter(studentNumber=student).select_related('subjectCode')
 
         return render(request, 'students/student_dashboard.html', {
             'student': student,
-            'subjects': all_subjects,
+            'subjects': subjects,
+            'progress': progress,
+            'marks': marks,
+            'upcoming_assessments': upcoming_assessments,
+            'attendance_records': attendance_records,
         })
-
     except Student.DoesNotExist:
         return redirect('login')
 
@@ -374,7 +395,88 @@ def role_login(request):
         form = RoleLoginForm()
     return render(request, 'login.html', {'form': form})
 
-
+#logout view
 def logout_view(request):
     logout(request)
     return redirect('login')
+
+@login_required
+def download_subjects_csv(request):
+    student = Student.objects.get(user=request.user)
+    # Get all subjects for this student (as in your dashboard)
+    attendance_subjects = Subject.objects.filter(attendance__studentNumber=student)
+    progress_subjects = Subject.objects.filter(studentprogress__studentNumber=student)
+    marks_subjects = Subject.objects.filter(
+        assessment__studentmarks__studentNumber=student
+    )
+    subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="my_subjects.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Subject Code', 'Subject Name', 'Department'])
+
+    for subject in subjects:
+        writer.writerow([
+            subject.subjectCode,
+            subject.subjectName,
+            subject.D_Code.D_Name if subject.D_Code else ''
+        ])
+
+    return response
+
+@login_required
+def student_attendance(request):
+    student = Student.objects.get(user=request.user)
+    # Get all attendance records for this student
+    attendance_records = Attendance.objects.filter(studentNumber=student).select_related('subjectCode')
+    
+    # Attendance summary
+    total_classes = attendance_records.count()
+    presents = attendance_records.filter(status='Present').count()
+    absents = attendance_records.filter(status='Absent').count()
+    attendance_rate = (presents / total_classes * 100) if total_classes else 0
+
+    return render(request, 'students/student_attendance.html', {
+        'student': student,
+        'attendance_records': attendance_records,
+        'total_classes': total_classes,
+        'presents': presents,
+        'absents': absents,
+        'attendance_rate': attendance_rate,
+    })
+
+from django.utils import timezone
+from .models import Attendance, Subject, Student
+
+@login_required
+def take_attendance(request):
+    student = Student.objects.get(user=request.user)
+    subjects = Subject.objects.filter(studentprogress__studentNumber=student).distinct()
+    message = ""
+    if request.method == "POST":
+        subject_id = request.POST.get("subject_id")
+        subject = Subject.objects.get(pk=subject_id)
+        today = timezone.now().date()
+        # Prevent duplicate attendance for the same subject and day
+        already_marked = Attendance.objects.filter(
+            studentNumber=student,
+            subjectCode=subject,
+            dateAndTime__date=today
+        ).exists()
+        if not already_marked:
+            Attendance.objects.create(
+                studentNumber=student,
+                subjectCode=subject,
+                dateAndTime=timezone.now(),
+                status="Present"
+            )
+            message = "Attendance marked!"
+        else:
+            message = "You have already marked attendance for this subject today."
+    return render(request, "students/take_attendance.html", {
+        "student": student,
+        "subjects": subjects,
+        "message": message,
+    })
