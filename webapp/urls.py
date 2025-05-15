@@ -60,4 +60,7 @@ urlpatterns = [
 
     # Take attendance
     path('take_attendance/', views.take_attendance, name='take_attendance'),
+
+    # Download attendance CSV
+    path('download_attendance/', views.download_attendance_csv, name='download_attendance_csv'),
 ]

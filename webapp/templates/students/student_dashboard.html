@@ -207,7 +207,6 @@
 
 <div class="main-content subjects-container" id="subjects-content">
     <div class="header d-flex justify-content-between align-items-center">
-        <span>My Subjects</span>
         <a href="{% url 'download_subjects_csv' %}" class="btn btn-outline-primary btn-sm">
             Download CSV
         </a>
@@ -217,6 +216,20 @@
 
 <div class="main-content attendance-container" id="attendance-content" style="display:none;">
     <div class="header">Attendance Records</div>
+    <!-- Add this button where you display attendance records -->
+    <a href="{% url 'download_attendance_csv' %}" class="btn btn-outline-primary btn-sm mb-2">
+        Download Attendance CSV
+    </a>
+    <form method="get" action="{% url 'download_attendance_csv' %}">
+        <select name="subject">
+            <option value="">All Subjects</option>
+            {% for subject in subjects %}
+                <option value="{{ subject.subjectCode }}">{{ subject.subjectName }}</option>
+            {% endfor %}
+        </select>
+        <input type="date" name="date">
+        <button type="submit" class="btn btn-outline-primary btn-sm">Download Filtered CSV</button>
+    </form>
     <table class="table">
         <thead>
             <tr>

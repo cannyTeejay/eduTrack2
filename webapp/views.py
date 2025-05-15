@@ -326,6 +326,24 @@ def student_dashboard(request):
         )
         subjects = (attendance_subjects | progress_subjects | marks_subjects).distinct()
 
+        # --- AUTO ATTENDANCE LOGIC ---
+        from django.utils import timezone
+        today = timezone.now().date()
+        for subject in subjects:
+            already_marked = Attendance.objects.filter(
+                studentNumber=student,
+                subjectCode=subject,
+                dateAndTime__date=today
+            ).exists()
+            if not already_marked:
+                Attendance.objects.create(
+                    studentNumber=student,
+                    subjectCode=subject,
+                    dateAndTime=timezone.now(),
+                    status="Present"
+                )
+        # --- END AUTO ATTENDANCE LOGIC ---
+
         # 3. Progress/Grades
         progress = StudentProgress.objects.filter(studentNumber=student).select_related('subjectCode')
 
@@ -480,3 +498,39 @@ def take_attendance(request):
         "subjects": subjects,
         "message": message,
     })
+
+import csv
+from django.http import HttpResponse
+
+@login_required
+def download_attendance_csv(request):
+    student = Student.objects.get(user=request.user)
+    subject_code = request.GET.get('subject')  # e.g., 'ICT1611'
+    date_str = request.GET.get('date')         # e.g., '2025-06-01'
+
+    attendance_records = Attendance.objects.filter(studentNumber=student).select_related('subjectCode')
+
+    if subject_code:
+        attendance_records = attendance_records.filter(subjectCode__subjectCode=subject_code)
+    if date_str:
+        from datetime import datetime
+        try:
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+            attendance_records = attendance_records.filter(dateAndTime__date=date_obj)
+        except ValueError:
+            pass  # Ignore invalid date
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="attendance_records.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow(['Subject', 'Date', 'Status'])
+
+    for record in attendance_records:
+        writer.writerow([
+            record.subjectCode.subjectName,
+            record.dateAndTime.strftime('%Y-%m-%d'),
+            record.status
+        ])
+
+    return response
